@@ -31,7 +31,7 @@ jobs:
         with:
           repository: squidowl/halloy
           path: halloy
-          ref: ${{ github.event.inputs.commit || "tags/"github.event.inputs.version }}
+          ref: ${{ github.event.inputs.commit || format('tags/{0}', github.event.inputs.version) }}
 
       - name: Setup Pages
         uses: actions/configure-pages@v6
