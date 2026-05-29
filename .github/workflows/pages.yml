@@ -1,0 +1,66 @@
+name: Deploy Documentation
+
+on:
+  workflow_dispatch:
+    inputs:
+      version:
+        description: "Release version to deploy documentation for"
+        required: true
+      commit:
+        description: "Commit hash to checkout (version tag used if omitted)"
+        required: false
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: pages
+  cancel-in-progress: false
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    env: |
+      DOCS_CHANNEL: latest
+      DOCS_VERSION: ${{ github.event.inputs.version }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v6
+        with:
+          repository: squidowl/halloy
+          path: halloy
+          ref: ${{ github.event.inputs.commit || "tags/"github.event.inputs.version }}
+
+      - name: Setup Pages
+        uses: actions/configure-pages@v6
+
+      - name: Setup Bun
+        uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: latest
+
+      - name: Install dependencies
+        working-directory: halloy/docs
+        run: bun install --frozen-lockfile
+
+      - name: Build docs
+        working-directory: halloy/docs
+        run: bun run docs:build
+
+      - name: Upload artifact
+        uses: actions/upload-pages-artifact@v5
+        with:
+          path: halloy/docs/.vitepress/dist
+
+  deploy:
+    needs: build
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v5
