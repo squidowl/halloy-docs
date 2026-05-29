@@ -22,7 +22,7 @@ concurrency:
 jobs:
   build:
     runs-on: ubuntu-latest
-    env: |
+    env:
       DOCS_CHANNEL: latest
       DOCS_VERSION: ${{ github.event.inputs.version }}
     steps:
