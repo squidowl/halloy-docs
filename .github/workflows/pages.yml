@@ -25,6 +25,7 @@ jobs:
     env:
       DOCS_CHANNEL: latest
       DOCS_VERSION: ${{ github.event.inputs.version }}
+      DOCS_BASE: /halloy-docs/
     steps:
       - name: Checkout
         uses: actions/checkout@v6
